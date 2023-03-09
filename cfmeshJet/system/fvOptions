@@ -1,0 +1,127 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1912                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvOptions;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+limitT
+{
+    type       limitTemperature;
+    active     no;
+    min        100;
+    max        25000;
+    selectionMode all;
+}
+
+hSource
+{
+    type            scalarSemiImplicitSource;
+//      duration        10e-6;
+    active          yes;
+    log             true;
+
+    selectionMode   cellZone;
+    cellZone        interElectrodesZone;
+
+    volumeMode      specific;
+
+    injectionRateSuSp
+    {
+        h
+        {   
+            //Q=3.11mj v=1.57e-9 dt=10e-6
+            // Time-const from 0 to 10e-6 equal to 1.98e11
+            Su  table ((0 1.98e11) (10e-6 1.98e11) (10.001e-6 0));
+            Sp  0;
+        }
+
+    }
+}
+
+/*
+hSource
+{
+    type            scalarCodedSource;
+    name            sourceTime;
+    active          yes;
+
+    scalarCodedSourceCoeffs
+    {
+        selectionMode   cellZone;
+        cellZone        interElectrodesZone;
+
+        fields          (h);
+
+        codeInclude
+        #{
+        #};
+
+        codeCorrect
+        #{
+            //Pout<< "**codeCorrect**" << endl;
+        #};
+
+        codeAddSupRho
+        #{
+            const Time& time = mesh().time();
+            
+            const scalarField& V = mesh_.V();
+            scalarField& heSource = eqn.source();
+
+            const scalar Volume=1.57e-9;
+            const scalar Q=3e-3;
+
+            // End time
+            const scalar endTime = 10e-6;
+
+            // Retrieve the x component of the cell centres
+            //const scalarField& cellx = mesh_.C().component(0);
+
+            //apply source term only to inter electrode zone
+            forAll(mesh().cellZones(),ZoneI)
+            {    
+                const cellZone& cz = mesh().cellZones()[ZoneI];
+                const labelList& cells = cz;
+            
+                if (cz.name()=="interElectrodesZone")
+                {
+                        Pout<<"apply source Term to "<<cz.name()<<"\n"; 
+                   
+                        if (time.value() > 0.0 && time.value()< endTime)
+                        {
+                            // Apply the source
+                            forAll(cells, i)
+                            {
+                                // cell volume specific source
+                                //heSource[i] += 1e5*sin(200*cellx[i])*V[i];
+                                //if (cellx[i]<5e-4)
+                               // {
+                                    heSource[i]-=Q/(Volume*endTime)*V[i];
+                               // }
+                            };
+                        }
+
+                }//close if zone
+            }//close forAll zones
+        #};
+
+
+        codeConstrain
+        #{
+        #};
+    }
+
+}
+*/
+
+//************************************************************************** //

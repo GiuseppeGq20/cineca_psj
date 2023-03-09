@@ -1,0 +1,15 @@
+
+polyMesh/
+cellDecomposition
+extendedFeatureEdgeMesh
+
+processor*/
+0/
+[0-9]*.[0-9]*/
+
+postProcessing*/
+dynamicCode/
+
+*.foam
+log.*
+.ipynb_checkpoints/
