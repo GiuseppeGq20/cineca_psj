@@ -58,7 +58,61 @@ functions
     #includeFunc yPlus;
     #includeFunc minMaxMagnitude;
     #includeFunc solverInfo;
+   
+    nozzle_exit_avg_term
+    {
+        type            surfaceFieldValue;
+        functionObjectLibs ("libfieldFunctionObjects.so");
+        enabled         true;
 
+        writeFields     true;
+
+
+       surfaceFormat   raw;
+        regionType          sampledSurface;
+
+
+
+        name      exit_nozzle;
+        sampledSurfaceDict
+        {
+            type plane;
+            planeType       pointAndNormal;
+            pointAndNormalDict
+            {
+                basePoint        (0 0 0.0029);
+                normalVector    (0 0 1);
+            }
+        }
+        operation       areaAverage;
+        fields
+        (
+            p
+            U
+        );
+    }
+
+    volFieldValue1
+    {
+        type            volFieldValue;
+        libs            ("libfieldFunctionObjects.so");
+        log             true;
+        writeControl    timeStep;
+        writeFields     true;
+
+        regionType      cellZone;
+        name            cavity;
+        operation       volAverage;
+
+
+        fields
+        (
+            
+            T
+            p
+	   
+        );
+    }
 };
 
 /*
